@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors";
-import { Collection, MongoClient } from "mongodb"
+import { MongoClient } from "mongodb"
 import "dotenv/config"
 
 
@@ -37,9 +37,7 @@ app.post("/add-event", async (request,response) => {
                 message: "MongoDB collection is not initialized",
             });
         }
-
         const result = await addEventCollection.insertOne(addEventData);
-
         response.status(201).send({
             success: true,
             message: "Event added successfully",
@@ -64,7 +62,19 @@ app.get("/recent-event", async (request, response) => {
         response.send(result)
     } catch (error) {
         console.error(error);
-        response.status(5000).send({ message: "Failed to fetched data" })
+        response.status(500).send({ message: "Failed to fetched data" })
+    }
+})
+
+// All Events
+app.get("/all-events",async (request,response) => {
+    try{
+        const today = new Date().toLocaleDateString("en-CA",{timeZone: "Asia/Dhaka"});
+        const result = await addEventCollection.find({eventDate: {$gte: today}}).sort({eventDate: 1}).toArray();
+        response.send(result);
+    }catch(error){
+        console.error(error);
+        response.status(500).send({message: "Failed to fetched data"})
     }
 })
 
