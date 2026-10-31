@@ -57,7 +57,16 @@ app.post("/add-event", async (request,response) => {
 
 
 // GET APIS
-
+app.get("/recent-event", async (request, response) => {
+    try {
+        const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+        const result = await addEventCollection?.find({ eventDate: { $gte: today } }).sort({ eventDate: 1 }).limit(6).toArray();
+        response.send(result)
+    } catch (error) {
+        console.error(error);
+        response.status(5000).send({ message: "Failed to fetched data" })
+    }
+})
 
 
 app.get("/", (request, response) => {
