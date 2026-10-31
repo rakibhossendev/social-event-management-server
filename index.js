@@ -26,6 +26,34 @@ const mongoClient = await connectToMongoDB();
 const db = mongoClient?.db("social-event-management");
 const addEventCollection = db?.collection("add-event");
 
+// All post api
+app.post("/add-event", async (request,response) => {
+    try {
+        const addEventData = request.body;
+
+        if (!addEventCollection) {
+            return response.status(500).send({
+                success: false,
+                message: "MongoDB collection is not initialized",
+            });
+        }
+
+        const result = await addEventCollection.insertOne(addEventData);
+
+        response.status(201).send({
+            success: true,
+            message: "Event added successfully",
+            insertedId: result.insertedId,
+        });
+
+    } catch (error) {
+        console.error("Add Event Error:", error);
+        response.status(500).send({
+            success: false,
+            message: "Failed to add event",
+        });
+    }
+});
 
 
 // GET APIS
