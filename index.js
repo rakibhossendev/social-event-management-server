@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors";
-import { MongoClient } from "mongodb"
+import { MongoClient, ObjectId } from "mongodb"
 import "dotenv/config"
 
 
@@ -78,6 +78,17 @@ app.get("/all-events",async (request,response) => {
     }
 })
 
+// Event Details
+app.get("/event/:id",async (request,response) => {
+    try{
+        const {id} = request.params;
+        const result = await addEventCollection.findOne({_id: new ObjectId(id)});
+        response.send(result)
+    }catch(error){
+        console.error(error);
+        response.status(500).send({message: "Fail to fetch data"})
+    }
+})
 
 app.get("/", (request, response) => {
     response.send("Express Server was running");
