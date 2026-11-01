@@ -142,10 +142,29 @@ app.get("/recent-event", async (request, response) => {
     try {
         const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
         const result = await addEventCollection?.find({ eventDate: { $gte: today } }).sort({ eventDate: 1 }).limit(6).toArray();
-        response.send(result)
+        if (!result) {
+            return response.status(404).send({
+                success: false,
+                message: "data not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
+        response.status(200).send({
+            success: true,
+            message: "Data find successfully",
+            data: result
+        })
     } catch (error) {
         console.error(error);
-        response.status(500).send({ message: "Failed to fetched data" })
+        response.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: {
+                code: "INTERNAL_SERVER_ERROR"
+            }
+        })
     }
 })
 
@@ -154,10 +173,31 @@ app.get("/all-events", async (request, response) => {
     try {
         const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
         const result = await addEventCollection.find({ eventDate: { $gte: today } }).sort({ eventDate: 1 }).toArray();
-        response.send(result);
+
+        if (!result) {
+            return response.status(404).send({
+                success: false,
+                message: "Data not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
+
+        response.status(200).send({
+            success: false,
+            message: "data find successfully",
+            data: result
+        });
     } catch (error) {
         console.error(error);
-        response.status(500).send({ message: "Failed to fetched data" })
+        response.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: {
+                code: "INTERNAL_SERVER_ERROR"
+            }
+        })
     }
 })
 
@@ -166,10 +206,32 @@ app.get("/event/:id", async (request, response) => {
     try {
         const { id } = request.params;
         const result = await addEventCollection.findOne({ _id: new ObjectId(id) });
-        response.send(result)
+
+        if (!result) {
+            return response.status(404).send({
+                success: false,
+                message: "Data not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
+
+        response.status(200).send({
+            success: false,
+            message: "data find successfully",
+            data: result
+        });
+
     } catch (error) {
         console.error(error);
-        response.status(500).send({ message: "Fail to fetch data" })
+        response.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: {
+                code: "INTERNAL_SERVER_ERROR"
+            }
+        })
     }
 })
 //  Filter event use email
@@ -177,17 +239,69 @@ app.get("/my-events/:email", async (request, response) => {
     try {
         const { email } = request.params
         const result = await addEventCollection.find({ email: email }).toArray();
-        response.send(result)
+
+        if (!result) {
+            return response.status(404).send({
+                success: false,
+                message: "Data not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
+
+        response.status(200).send({
+            success: false,
+            message: "data find successfully",
+            data: result
+        });
+
 
     } catch (error) {
         console.error(error);
-        response.status(500).send({ message: "Failed to fetched data" })
+        response.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: {
+                code: "INTERNAL_SERVER_ERROR"
+            }
+        })
     }
 
 })
 
+app.get('/my-joined-event/:email', async (request, response) => {
+    try {
+        const { email } = request.params;
+        const result = await joinedEventCollection.find({ participateEmail: email }).toArray();
+        if (!result) {
+            return response.status(404).send({
+                success: false,
+                message: "Joined Data not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
 
+        return response.status(200).send({
+            success: true,
+            message: "Joined Data find successfully",
+            data: result
+        })
 
+    } catch (error) {
+        console.error(error);
+        return response.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: {
+                code: "INTERNAL_SERVER_ERROR"
+            }
+        })
+    }
+
+})
 
 app.get("/", (request, response) => {
     response.send("Express Server was running");
