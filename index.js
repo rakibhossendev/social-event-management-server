@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors";
 import { MongoClient, ObjectId } from "mongodb"
 import "dotenv/config"
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
 
 const app = express();
@@ -26,8 +27,29 @@ const mongoClient = await connectToMongoDB();
 const db = mongoClient?.db("social-event-management");
 const addEventCollection = db?.collection("add-event");
 
+// Middleware
+async function verifyJWTToken(request,response,next){
+    const authHeader = request.headers.authorization;
+    if(!authHeader){
+        return response.status(401).send({message: "OOps! Your are not authorized user!!!!!"})
+    }
+    const jwtToken = authHeader.split(" ")[1]
+    if(!jwtToken){
+        return response.status(401).send({message: "OOPs! You are not authorized user!!!."})
+    }
+    try{
+        const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_BASE_URL}/api/auth/jwks`))
+        const {payload} = await jwtVerify(jwtToken,JWKS) 
+    }catch(error){
+        console.error(error)
+    }
+
+    next()
+} 
+
+
 // All post api
-app.post("/add-event", async (request,response) => {
+app.post("/add-event",verifyJWTToken,async (request,response) => {
     try {
         const addEventData = request.body;
 
@@ -79,7 +101,7 @@ app.get("/all-events",async (request,response) => {
 })
 
 // Event Details
-app.get("/event/:id",async (request,response) => {
+app.get("/event/:id",verifyJWTToken,async (request,response) => {
     try{
         const {id} = request.params;
         const result = await addEventCollection.findOne({_id: new ObjectId(id)});
