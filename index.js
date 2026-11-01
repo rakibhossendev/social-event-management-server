@@ -267,9 +267,10 @@ app.get("/my-events/:email", async (request, response) => {
             }
         })
     }
-
+    
 })
 
+// joined events
 app.get('/my-joined-event/:email', async (request, response) => {
     try {
         const { email } = request.params;
@@ -302,6 +303,9 @@ app.get('/my-joined-event/:email', async (request, response) => {
     }
 
 })
+
+
+
 
 app.get("/", (request, response) => {
     response.send("Express Server was running");
