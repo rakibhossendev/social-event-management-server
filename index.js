@@ -111,6 +111,19 @@ app.get("/event/:id",verifyJWTToken,async (request,response) => {
         response.status(500).send({message: "Fail to fetch data"})
     }
 })
+//  Filter event use email
+app.get("/my-events/:email",async (request,response) => {
+    try{
+        const {email} = request.params
+        const result = await addEventCollection.find({email: email}).toArray();
+        response.send(result)
+
+    }catch(error){
+        console.error(error);
+        response.status(500).send({message: "Failed to fetched data"})
+    }
+
+})
 
 app.get("/", (request, response) => {
     response.send("Express Server was running");
