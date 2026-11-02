@@ -1,4 +1,4 @@
-import express, { response } from "express"
+import express, { request, response } from "express"
 import cors from "cors";
 import { MongoClient, ObjectId } from "mongodb"
 import "dotenv/config"
@@ -267,7 +267,7 @@ app.get("/my-events/:email", async (request, response) => {
             }
         })
     }
-    
+
 })
 
 // joined events
@@ -304,6 +304,76 @@ app.get('/my-joined-event/:email', async (request, response) => {
 
 })
 
+//  Delete Event api
+app.delete("/delete-event/:id", async (request, response) => {
+    try {
+        const { id } = request.params;
+        const result = await addEventCollection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deleteCount === 0) {
+            return response.status(404).send({
+                success: false,
+                message: "Data not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
+
+        return response.status(200).send({
+            success: true,
+            message: "Event Deleted successfully",
+        })
+
+    } catch (error) {
+        console.error(error);
+        return response.status(500).send({
+            success: false,
+            message: "Internal server error",
+            error: {
+                code: "INTERNAL_SERVER_ERROR"
+            }
+        })
+    }
+})
+
+// Edit Event
+app.patch("/edit-event/:id", async (request, response) => {
+    try{
+        const { id } = request.params;
+        const data = request.body;
+
+        const result = await addEventCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: data },
+        )
+
+        if(result.matchedCount === 0){
+            return response.status(404).send({
+                success: false,
+                message: "not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
+
+        return response.status(200).send({
+            success: true,
+            message: result.modifiedCount > 0 ? 'Event Data updated successfully' : "No Changes detected"
+        })
+
+    }catch(error){
+        return response.status(500).send({
+            success: false,
+            message: "Internal Server Error",
+            error: {
+                code: "INTERNAL_SERVER_ERROR"
+            }
+        })
+    }
+
+})
 
 
 
