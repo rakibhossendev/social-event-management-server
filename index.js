@@ -337,9 +337,40 @@ app.delete("/delete-event/:id", async (request, response) => {
     }
 })
 
+// Cancel Event 
+app.delete("/cancel-event/:id", async (request, response) => {
+    try {
+        const { id } = request.params;
+        const result = await joinedEventCollection.deleteOne({ _id: new ObjectId(id) });
+        if(result.deleteCount === 0){
+            return response.status(404).send({
+                success: false,
+                message: "Data not found",
+                error: {
+                    code: "NOT_FOUND"
+                }
+            })
+        }
+
+        return response.status(200).send({
+            success: true,
+            message: "Joined Event canceled successfully"
+        })
+    } catch (error) {
+        return response.status(500).send({
+            success: false,
+            message: "Internal server error",
+            code: {
+                error: "INTERNAL_SERVER_ERROR"
+            }
+        })
+    }
+
+})
+
 // Edit Event
 app.patch("/edit-event/:id", async (request, response) => {
-    try{
+    try {
         const { id } = request.params;
         const data = request.body;
 
@@ -348,7 +379,7 @@ app.patch("/edit-event/:id", async (request, response) => {
             { $set: data },
         )
 
-        if(result.matchedCount === 0){
+        if (result.matchedCount === 0) {
             return response.status(404).send({
                 success: false,
                 message: "not found",
@@ -363,7 +394,7 @@ app.patch("/edit-event/:id", async (request, response) => {
             message: result.modifiedCount > 0 ? 'Event Data updated successfully' : "No Changes detected"
         })
 
-    }catch(error){
+    } catch (error) {
         return response.status(500).send({
             success: false,
             message: "Internal Server Error",
