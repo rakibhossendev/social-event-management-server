@@ -50,7 +50,7 @@ async function verifyJWTToken(request, response, next) {
 
 
 // All post api
-app.post("/add-event",verifyJWTToken, async (request, response) => {
+app.post("/add-event", verifyJWTToken, async (request, response) => {
     try {
         const addEventData = request.body;
 
@@ -77,7 +77,7 @@ app.post("/add-event",verifyJWTToken, async (request, response) => {
 });
 
 //  Join event data 
-app.post("/join-event",verifyJWTToken, async (request, response) => {
+app.post("/join-event", verifyJWTToken, async (request, response) => {
     try {
         const { eventId, email, postJoinEvent } = request.body;
 
@@ -202,7 +202,7 @@ app.get("/all-events", async (request, response) => {
 })
 
 // Event Details
-app.get("/event/:id",verifyJWTToken, async (request, response) => {
+app.get("/event/:id", verifyJWTToken, async (request, response) => {
     try {
         const { id } = request.params;
         const result = await addEventCollection.findOne({ _id: new ObjectId(id) });
@@ -235,10 +235,11 @@ app.get("/event/:id",verifyJWTToken, async (request, response) => {
     }
 })
 //  Filter event use email
-app.get("/my-events/:email",verifyJWTToken, async (request, response) => {
+app.get("/my-events/:email", verifyJWTToken, async (request, response) => {
     try {
+        const today = new Date().toISOString().split("T")[ 0 ]
         const { email } = request.params
-        const result = await addEventCollection.find({ email: email }).toArray();
+        const result = await addEventCollection.find({ email: email, eventDate: { $gte: today } }).toArray();
 
         if (!result) {
             return response.status(404).send({
@@ -271,10 +272,11 @@ app.get("/my-events/:email",verifyJWTToken, async (request, response) => {
 })
 
 // joined events
-app.get('/my-joined-event/:email',verifyJWTToken, async (request, response) => {
+app.get('/my-joined-event/:email', verifyJWTToken, async (request, response) => {
     try {
         const { email } = request.params;
-        const result = await joinedEventCollection.find({ participateEmail: email }).toArray();
+        const today = new Date().toISOString().split("T")[ 0 ]
+        const result = await joinedEventCollection.find({ participateEmail: email, eventDate: {$gte: today}}).toArray();
         if (!result) {
             return response.status(404).send({
                 success: false,
@@ -305,7 +307,7 @@ app.get('/my-joined-event/:email',verifyJWTToken, async (request, response) => {
 })
 
 //  Delete Event api
-app.delete("/delete-event/:id",verifyJWTToken, async (request, response) => {
+app.delete("/delete-event/:id", verifyJWTToken, async (request, response) => {
     try {
         const { id } = request.params;
         const result = await addEventCollection.deleteOne({ _id: new ObjectId(id) });
@@ -338,11 +340,11 @@ app.delete("/delete-event/:id",verifyJWTToken, async (request, response) => {
 })
 
 // Cancel Event 
-app.delete("/cancel-event/:id",verifyJWTToken, async (request, response) => {
+app.delete("/cancel-event/:id", verifyJWTToken, async (request, response) => {
     try {
         const { id } = request.params;
-        const result = await joinedEventCollection.deleteOne({eventId: new ObjectId(id)});
-        if(result.deletedCount === 0){
+        const result = await joinedEventCollection.deleteOne({ eventId: new ObjectId(id) });
+        if (result.deletedCount === 0) {
             return response.status(404).send({
                 success: false,
                 message: "Data not found",
@@ -369,7 +371,7 @@ app.delete("/cancel-event/:id",verifyJWTToken, async (request, response) => {
 })
 
 // Edit Event
-app.patch("/edit-event/:id",verifyJWTToken, async (request, response) => {
+app.patch("/edit-event/:id", verifyJWTToken, async (request, response) => {
     try {
         const { id } = request.params;
         const data = request.body;
